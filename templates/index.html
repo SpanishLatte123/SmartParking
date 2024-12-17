@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 197 SS: Smart Parking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .parking-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .parking-space {
+            width: 150px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .free {
+            background-color: green;
+        }
+        .occupied {
+            background-color: red;
+        }
+        .timestamp {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>ECE 197 SS: Smart Parking</h1>
+    <div class="parking-container" id="parking-container"></div>
+    <p class="timestamp" id="timestamp"></p>
+
+    <script>
+        async function fetchParkingStatus() {
+            try {
+                const response = await fetch("/api/parking_status");
+                const data = await response.json();
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+    
+                const container = document.getElementById("parking-container");
+                const timestampElem = document.getElementById("timestamp");
+    
+                // Update timestamp
+                timestampElem.textContent = `Last updated: ${data.timestamp}`;
+    
+                // Clear current parking spaces
+                container.innerHTML = "";
+    
+                // Update parking spaces
+                Object.keys(data.spaces).forEach(space => {
+                    const div = document.createElement("div");
+                    div.classList.add("parking-space");
+                    div.classList.add(data.spaces[space] === "Free" ? "free" : "occupied");
+                    div.textContent = `${space}: ${data.spaces[space]}`;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error fetching parking status:", error);
+            }
+        }
+    
+        // Fetch parking status every 0.5 seconds
+        setInterval(fetchParkingStatus, 500);
+        fetchParkingStatus(); // Initial fetch
+    </script>
+    
+</body>
+</html>
